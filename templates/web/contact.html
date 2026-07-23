@@ -1,0 +1,115 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'web:home' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "Dashboard" %}
+</a>
+{% endblock %}
+
+{% block page_title %}Contact Us{% endblock %}
+
+{% block body %}
+<section class="px-4 py-16 mx-auto max-w-(--breakpoint-xl)">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="mb-8 text-4xl font-bold tracking-tight md:text-5xl">Contact Us</h1>
+    
+    <p class="mb-8 text-lg text-base-content/80">
+      Have questions about PetPal? Want to partner with us as a shelter? We'd love to hear from you. 
+      Fill out the form below and we'll get back to you as soon as possible.
+    </p>
+    
+    <div class="card border border-base-300 bg-base-200/50">
+      <div class="card-body">
+        <form method="post" action="{% url 'web:contact' %}">
+          {% csrf_token %}
+          
+          <div class="mb-4 form-control">
+            <label class="label" for="{{ form.name.id_for_label }}">
+              <span class="label-text">{{ form.name.label }}</span>
+            </label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.name.errors }}</span>
+              </label>
+            {% endif %}
+          </div>
+          
+          <div class="mb-4 form-control">
+            <label class="label" for="{{ form.email.id_for_label }}">
+              <span class="label-text">{{ form.email.label }}</span>
+            </label>
+            {{ form.email }}
+            {% if form.email.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.email.errors }}</span>
+              </label>
+            {% endif %}
+          </div>
+          
+          <div class="mb-4 form-control">
+            <label class="label" for="{{ form.subject.id_for_label }}">
+              <span class="label-text">{{ form.subject.label }}</span>
+            </label>
+            {{ form.subject }}
+            {% if form.subject.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.subject.errors }}</span>
+              </label>
+            {% endif %}
+          </div>
+          
+          <div class="mb-6 form-control">
+            <label class="label" for="{{ form.message.id_for_label }}">
+              <span class="label-text">{{ form.message.label }}</span>
+            </label>
+            {{ form.message }}
+            {% if form.message.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.message.errors }}</span>
+              </label>
+            {% endif %}
+          </div>
+          
+          <div class="form-control">
+            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    
+    <div class="mt-12">
+      <h2 class="mb-4 text-2xl font-bold">Other Ways to Reach Us</h2>
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center justify-center rounded-box size-12 bg-primary/10 text-primary">
+            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Email</p>
+            <p class="text-base-content/70">{{ project_meta.CONTACT_EMAIL }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="flex items-center justify-center rounded-box size-12 bg-primary/10 text-primary">
+            <svg class="size-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <div>
+            <p class="font-semibold">Location</p>
+            <p class="text-base-content/70">Available Nationwide</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -44,3 +44,11 @@ class CustomUser(AbstractUser):
     @cached_property
     def has_verified_email(self):
         return EmailAddress.objects.filter(user=self, verified=True).exists()
+
+    def is_shelter(self) -> bool:
+        """Check if user is a shelter admin."""
+        return self.groups.filter(name="Shelter").exists()
+
+    def is_adopter(self) -> bool:
+        """Check if user is an adopter."""
+        return self.groups.filter(name="Adopter").exists()

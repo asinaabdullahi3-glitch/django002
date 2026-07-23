@@ -1,20 +1,31 @@
 {% load i18n %}
 {% load static %}
-<section class="hero">
+<section class="hero bg-gradient-to-r from-primary/10 to-secondary/10">
   <div class="hero-content flex-col gap-10 px-4 py-16 mx-auto max-w-(--breakpoint-xl) lg:flex-row-reverse lg:py-24">
-    <img src="{% static 'images/web/rocket-laptop.svg' %}" alt="{% translate "Fly Away!" %}"
-         class="hidden w-full max-w-sm lg:block">
     <div class="max-w-xl">
       <h1 class="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
-        {{ project_meta.NAME }}
+        Find Your Perfect Companion
       </h1>
       <p class="py-6 text-lg text-base-content/70">
         {{ project_meta.DESCRIPTION }}
       </p>
       <div class="flex flex-col gap-3 sm:flex-row">
-        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">{% translate "Get started" %}</a>
-        <a href="{% url 'account_login' %}" class="btn btn-lg">{% translate "Sign in" %}</a>
+        <a href="{% url 'pets:pet_list' %}" class="btn btn-primary btn-lg">Browse Pets</a>
+        <a href="{% url 'account_signup' %}" class="btn btn-lg">Sign Up</a>
       </div>
+    </div>
+    <div class="hidden w-full max-w-sm lg:block">
+      <svg viewBox="0 0 500 400" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+        <rect width="500" height="400" fill="#f0f9ff" rx="20"/>
+        <circle cx="250" cy="200" r="120" fill="#dbeafe"/>
+        <circle cx="200" cy="180" r="15" fill="#1e40af"/>
+        <circle cx="300" cy="180" r="15" fill="#1e40af"/>
+        <ellipse cx="250" cy="220" rx="20" ry="15" fill="#1e40af"/>
+        <path d="M180 150 Q250 100 320 150" stroke="#1e40af" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <path d="M150 250 Q250 300 350 250" stroke="#1e40af" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <circle cx="120" cy="280" r="30" fill="#93c5fd"/>
+        <circle cx="380" cy="280" r="30" fill="#93c5fd"/>
+      </svg>
     </div>
   </div>
 </section>

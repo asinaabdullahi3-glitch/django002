@@ -1,0 +1,148 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'web:home' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "Dashboard" %}
+</a>
+{% endblock %}
+
+{% block page_title %}{% if is_admin %}Manage Pets{% else %}Browse Pets{% endif %}{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-4xl font-bold tracking-tight">
+        {% if is_admin %}Manage Pets{% else %}Browse Pets{% endif %}
+      </h1>
+      <p class="mt-1 text-base-content/60">
+        {% if is_admin %}All pets in the system.{% else %}Find your perfect companion from our available pets.{% endif %}
+      </p>
+    </div>
+    {% if is_admin %}
+      <a href="{% url 'pets:pet_create' %}" class="btn btn-primary">
+        + Add New Pet
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- Filters -->
+  <div class="mb-8 card border border-base-300 bg-base-200/50">
+    <div class="card-body py-4">
+      <form method="get" action="{% url 'pets:pet_list' %}" class="flex flex-wrap gap-4 items-end">
+        <div class="form-control">
+          <label class="label py-1" for="species"><span class="label-text">Species</span></label>
+          <select id="species" name="species" class="select select-bordered select-sm">
+            <option value="">All Species</option>
+            {% for value, label in species_choices %}
+              <option value="{{ value }}" {% if current_filters.species == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1" for="gender"><span class="label-text">Gender</span></label>
+          <select id="gender" name="gender" class="select select-bordered select-sm">
+            <option value="">Any Gender</option>
+            {% for value, label in gender_choices %}
+              <option value="{{ value }}" {% if current_filters.gender == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+          <a href="{% url 'pets:pet_list' %}" class="btn btn-neutral btn-sm">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Pet Grid -->
+  {% if pets %}
+    <div class="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {% for pet in pets %}
+        <div class="card border border-base-300 hover:border-primary/50 transition-colors bg-base-100">
+          {% if pet.image %}
+            <figure class="aspect-square overflow-hidden rounded-t-box">
+              <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="object-cover w-full h-full">
+            </figure>
+          {% else %}
+            <figure class="aspect-square bg-base-200 flex items-center justify-center rounded-t-box">
+              <svg class="w-20 h-20 text-base-content/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </figure>
+          {% endif %}
+
+          <div class="card-body gap-2">
+            <div class="flex items-start justify-between gap-2">
+              <h2 class="card-title text-lg">{{ pet.name }}</h2>
+              {% if pet.adoption_status == 'available' %}
+                <span class="badge badge-success badge-sm shrink-0">Available</span>
+              {% elif pet.adoption_status == 'pending' %}
+                <span class="badge badge-warning badge-sm shrink-0">Pending</span>
+              {% else %}
+                <span class="badge badge-neutral badge-sm shrink-0">{{ pet.get_adoption_status_display }}</span>
+              {% endif %}
+            </div>
+
+            <div class="text-sm text-base-content/70 space-y-0.5">
+              <p><span class="font-medium">Species:</span> {{ pet.get_species_display }}</p>
+              <p><span class="font-medium">Breed:</span> {{ pet.breed }}</p>
+              <p><span class="font-medium">Age:</span> {{ pet.age }} year{{ pet.age|pluralize }}</p>
+              <p><span class="font-medium">Gender:</span> {{ pet.get_gender_display }}</p>
+            </div>
+
+            <div class="mt-3 card-actions flex-col gap-1">
+              <a href="{% url 'pets:pet_detail' pet.pk %}" class="btn btn-primary btn-sm w-full">View Details</a>
+              {% if is_admin %}
+                <div class="flex gap-1 w-full">
+                  <a href="{% url 'pets:pet_update' pet.pk %}" class="btn btn-neutral btn-sm flex-1">Edit</a>
+                  <a href="{% url 'pets:pet_delete' pet.pk %}" class="btn btn-error btn-sm flex-1">Delete</a>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <div class="flex justify-center mt-4">
+        <div class="join">
+          {% if page_obj.has_previous %}
+            <a href="?page=1{% if current_filters.species %}&species={{ current_filters.species }}{% endif %}{% if current_filters.gender %}&gender={{ current_filters.gender }}{% endif %}" class="join-item btn">«</a>
+            <a href="?page={{ page_obj.previous_page_number }}{% if current_filters.species %}&species={{ current_filters.species }}{% endif %}{% if current_filters.gender %}&gender={{ current_filters.gender }}{% endif %}" class="join-item btn">‹</a>
+          {% endif %}
+          <span class="join-item btn btn-disabled">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if current_filters.species %}&species={{ current_filters.species }}{% endif %}{% if current_filters.gender %}&gender={{ current_filters.gender }}{% endif %}" class="join-item btn">›</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}{% if current_filters.species %}&species={{ current_filters.species }}{% endif %}{% if current_filters.gender %}&gender={{ current_filters.gender }}{% endif %}" class="join-item btn">»</a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="text-center py-16">
+      <svg class="w-20 h-20 mx-auto mb-4 text-base-content/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+      </svg>
+      {% if is_admin %}
+        <h3 class="text-xl font-semibold">No pets in the system yet</h3>
+        <p class="text-base-content/60 mt-2 mb-6">Add your first pet to get started.</p>
+        <a href="{% url 'pets:pet_create' %}" class="btn btn-primary">Add a Pet</a>
+      {% else %}
+        <h3 class="text-xl font-semibold">No pets available right now</h3>
+        <p class="text-base-content/60 mt-2">Check back soon — new pets are added regularly.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+</section>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'web:home' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "Dashboard" %}
+</a>
+{% endblock %}
+
+{% block page_title %}Adoption Requests{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+  <h1 class="mb-8 text-4xl font-bold tracking-tight">Manage Adoption Requests</h1>
+
+  <!-- Status filter -->
+  <div class="mb-6 card border border-base-300 bg-base-200/50">
+    <div class="card-body py-4">
+      <form method="get" action="{% url 'adoptions:request_list' %}" class="flex flex-wrap gap-4 items-end">
+        <div class="form-control">
+          <label class="label py-1" for="status">
+            <span class="label-text">Filter by Status</span>
+          </label>
+          <select id="status" name="status" class="select select-bordered select-sm">
+            <option value="">All Statuses</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+          <a href="{% url 'adoptions:request_list' %}" class="btn btn-neutral btn-sm">Clear</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  {% if requests %}
+    <div class="overflow-x-auto rounded-box border border-base-300">
+      <table class="table">
+        <thead class="bg-base-200/60">
+          <tr>
+            <th>Adopter</th>
+            <th>Pet</th>
+            <th>Message</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for adoption_request in requests %}
+            <tr class="hover:bg-base-200/30 transition-colors">
+              <!-- Adopter -->
+              <td>
+                <p class="font-semibold text-sm">{{ adoption_request.user.get_display_name }}</p>
+                <p class="text-xs text-base-content/60">{{ adoption_request.user.email }}</p>
+              </td>
+
+              <!-- Pet -->
+              <td>
+                <div class="flex items-center gap-3">
+                  {% if adoption_request.pet.image %}
+                    <img src="{{ adoption_request.pet.image.url }}"
+                         alt="{{ adoption_request.pet.name }}"
+                         class="w-12 h-12 rounded-lg object-cover flex-shrink-0">
+                  {% else %}
+                    <div class="flex items-center justify-center w-12 h-12 bg-base-300 rounded-lg flex-shrink-0">
+                      <svg class="w-6 h-6 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                      </svg>
+                    </div>
+                  {% endif %}
+                  <div>
+                    <p class="font-semibold text-sm">{{ adoption_request.pet.name }}</p>
+                    <p class="text-xs text-base-content/60">{{ adoption_request.pet.get_species_display }} · {{ adoption_request.pet.breed }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Message preview -->
+              <td class="max-w-xs">
+                {% if adoption_request.message %}
+                  <p class="text-sm text-base-content/70 truncate">{{ adoption_request.message }}</p>
+                {% else %}
+                  <span class="text-xs text-base-content/40 italic">No message</span>
+                {% endif %}
+              </td>
+
+              <!-- Date -->
+              <td class="text-sm text-base-content/70 whitespace-nowrap">
+                {{ adoption_request.created_at|date:"M d, Y" }}
+              </td>
+
+              <!-- Status badge -->
+              <td>
+                {% if adoption_request.status == 'pending' %}
+                  <span class="badge badge-warning">Pending</span>
+                {% elif adoption_request.status == 'approved' %}
+                  <span class="badge badge-success">Approved</span>
+                {% elif adoption_request.status == 'rejected' %}
+                  <span class="badge badge-error">Rejected</span>
+                {% else %}
+                  <span class="badge badge-neutral">{{ adoption_request.get_status_display }}</span>
+                {% endif %}
+              </td>
+
+              <!-- Actions -->
+              <td>
+                <div class="flex gap-2">
+                  {% if adoption_request.status == 'pending' %}
+                    <form method="post" action="{% url 'adoptions:request_approve' adoption_request.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                    </form>
+                    <form method="post" action="{% url 'adoptions:request_reject' adoption_request.pk %}">
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-sm btn-error">Reject</button>
+                    </form>
+                  {% endif %}
+                  <a href="{% url 'pets:pet_detail' adoption_request.pet.pk %}" class="btn btn-sm btn-ghost">View Pet</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  {% else %}
+    <div class="text-center py-16">
+      <svg class="w-20 h-20 mx-auto mb-4 text-base-content/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      <h3 class="text-xl font-semibold mb-2">No adoption requests found</h3>
+      <p class="text-base-content/60">
+        {% if current_status %}Try clearing the status filter.{% else %}No requests have been submitted yet.{% endif %}
+      </p>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

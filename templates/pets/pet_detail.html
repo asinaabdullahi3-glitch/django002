@@ -1,0 +1,129 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'pets:pet_list' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "All Pets" %}
+</a>
+{% endblock %}
+
+{% block page_title %}{{ pet.name }} — Pet Details{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+  <div class="grid gap-10 lg:grid-cols-2">
+
+    <!-- Image -->
+    <div>
+      {% if pet.image %}
+        <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="w-full rounded-2xl shadow-lg object-cover max-h-[520px]">
+      {% else %}
+        <div class="flex items-center justify-center w-full h-96 bg-base-200 rounded-2xl">
+          <svg class="w-32 h-32 text-base-content/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Details -->
+    <div class="flex flex-col gap-6">
+      <!-- Name + status badge -->
+      <div class="flex flex-wrap items-center gap-3">
+        <h1 class="text-4xl font-bold">{{ pet.name }}</h1>
+        {% if pet.adoption_status == 'available' %}
+          <span class="badge badge-success badge-lg">Available</span>
+        {% elif pet.adoption_status == 'pending' %}
+          <span class="badge badge-warning badge-lg">Pending</span>
+        {% else %}
+          <span class="badge badge-neutral badge-lg">{{ pet.get_adoption_status_display }}</span>
+        {% endif %}
+      </div>
+
+      <!-- Key facts -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body py-3 px-4">
+            <p class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Species</p>
+            <p class="text-base font-medium">{{ pet.get_species_display }}</p>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body py-3 px-4">
+            <p class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Breed</p>
+            <p class="text-base font-medium">{{ pet.breed }}</p>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body py-3 px-4">
+            <p class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Age</p>
+            <p class="text-base font-medium">{{ pet.age }} year{{ pet.age|pluralize }}</p>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body py-3 px-4">
+            <p class="text-xs font-semibold text-base-content/60 uppercase tracking-wide">Gender</p>
+            <p class="text-base font-medium">{{ pet.get_gender_display }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Description -->
+      {% if pet.description %}
+        <div>
+          <h2 class="text-lg font-semibold mb-1">About {{ pet.name }}</h2>
+          <p class="text-base-content/80 leading-relaxed">{{ pet.description }}</p>
+        </div>
+      {% endif %}
+
+      <!-- Adoption CTA -->
+      {% if not request.user.is_authenticated %}
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body">
+            <h3 class="card-title text-base">Sign in to adopt {{ pet.name }}</h3>
+            <p class="text-sm text-base-content/70">Create an account or sign in to submit an adoption request.</p>
+            <div class="card-actions mt-3">
+              <a href="{% url 'account_login' %}" class="btn btn-primary btn-sm">Sign In</a>
+              <a href="{% url 'account_signup' %}" class="btn btn-neutral btn-sm">Sign Up</a>
+            </div>
+          </div>
+        </div>
+
+      {% elif pet.adoption_status == 'available' %}
+        {% if has_existing_request %}
+          <div class="alert alert-info">
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 110 20A10 10 0 0112 2z"/>
+            </svg>
+            <span>You already have an adoption request for {{ pet.name }}.
+              <a href="{% url 'adoptions:my_requests' %}" class="link font-semibold">View your requests →</a>
+            </span>
+          </div>
+        {% else %}
+          <div class="card border border-primary bg-primary/5">
+            <div class="card-body">
+              <h3 class="card-title text-base">Interested in adopting {{ pet.name }}?</h3>
+              <p class="text-sm text-base-content/70">Submit an adoption request and the shelter will review it shortly.</p>
+              <div class="card-actions mt-3">
+                <a href="{% url 'adoptions:request_create' pet.pk %}" class="btn btn-primary">Request Adoption</a>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+      {% else %}
+        <div class="alert alert-warning">
+          <svg class="w-5 h-5 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span>{{ pet.name }} is currently <strong>{{ pet.get_adoption_status_display|lower }}</strong> and not available for new adoption requests.</span>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</section>
+{% endblock %}

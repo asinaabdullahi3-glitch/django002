@@ -1,0 +1,56 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'pets:pet_list' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "All Pets" %}
+</a>
+{% endblock %}
+
+{% block page_title %}Delete {{ object.name }}{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="mb-8 text-4xl font-bold tracking-tight md:text-5xl">Delete Pet</h1>
+    
+    <div class="card border border-error bg-error/5">
+      <div class="card-body">
+        <div class="flex gap-4 mb-4">
+          {% if object.image %}
+            <img src="{{ object.image.url }}" alt="{{ object.name }}" class="w-24 h-24 rounded-lg object-cover">
+          {% else %}
+            <div class="flex items-center justify-center w-24 h-24 bg-base-300 rounded-lg">
+              <svg class="w-12 h-12 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </div>
+          {% endif %}
+          <div>
+            <h2 class="text-xl font-bold">{{ object.name }}</h2>
+            <p class="text-base-content/70">{{ object.breed }} • {{ object.get_species_display }} • {{ object.age }} years old</p>
+          </div>
+        </div>
+        
+        <div class="alert alert-warning">
+          <svg class="w-6 h-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <span>
+            <strong>Warning:</strong> This action cannot be undone. Are you sure you want to delete {{ object.name }}?
+          </span>
+        </div>
+        
+        <form method="post" class="mt-6 flex gap-3">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-error">Yes, Delete Pet</button>
+          <a href="{% url 'pets:pet_list' %}" class="btn btn-neutral">Cancel</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -29,13 +29,13 @@ sitemaps = {
 }
 
 urlpatterns = [
-    # redirect Django admin login to main login page
-    path("admin/login/", RedirectView.as_view(pattern_name="account_login")),
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("accounts/", include("allauth.urls")),
     path("users/", include("apps.users.urls")),
     path("", include("apps.web.urls")),
+    path("pets/", include("apps.pets.urls")),
+    path("adoptions/", include("apps.adoptions.urls")),
     path("celery-progress/", include("celery_progress.urls")),
     # API docs.
     # These endpoints are public by default. To restrict access, pass `permission_classes`

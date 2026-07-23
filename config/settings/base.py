@@ -73,6 +73,8 @@ THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     "apps.users.apps.UserConfig",
     "apps.web",
+    "apps.pets.apps.PetsConfig",
+    "apps.adoptions.apps.AdoptionsConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -385,11 +387,11 @@ SCHEDULED_TASKS: dict[str, Any] = {
 
 # replace any values below with specifics for your project
 PROJECT_METADATA = {
-    "NAME": gettext_lazy("django-template"),
+    "NAME": gettext_lazy("PetPal"),
     "URL": "http://localhost:8000",
-    "DESCRIPTION": gettext_lazy("my django template"),  # noqa: E501
+    "DESCRIPTION": gettext_lazy("Find your perfect companion. PetPal connects loving families with pets in need of homes."),  # noqa: E501
     "IMAGE": "https://upload.wikimedia.org/wikipedia/commons/2/20/PEO-pegasus_black.svg",
-    "KEYWORDS": "SaaS, django",
+    "KEYWORDS": "pet adoption, pets, dogs, cats, animal shelter",
     "CONTACT_EMAIL": "achinga.chris@gmail.com",
 }
 

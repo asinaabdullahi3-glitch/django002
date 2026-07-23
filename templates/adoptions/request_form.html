@@ -1,0 +1,70 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'pets:pet_detail' pet.id %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {{ pet.name }}
+</a>
+{% endblock %}
+
+{% block page_title %}Submit Adoption Request{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="mb-8 text-4xl font-bold tracking-tight md:text-5xl">Adopt {{ pet.name }}</h1>
+    
+    <div class="mb-8 card border border-base-300 bg-base-200/50">
+      <div class="card-body">
+        <div class="flex gap-4">
+          {% if pet.image %}
+            <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="w-24 h-24 rounded-lg object-cover">
+          {% else %}
+            <div class="flex items-center justify-center w-24 h-24 bg-base-300 rounded-lg">
+              <svg class="w-12 h-12 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+              </svg>
+            </div>
+          {% endif %}
+          <div>
+            <h2 class="text-xl font-bold">{{ pet.name }}</h2>
+            <p class="text-base-content/70">{{ pet.breed }} • {{ pet.get_species_display }} • {{ pet.age }} years old</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <h3 class="card-title mb-4">Tell us about yourself</h3>
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mb-6 form-control">
+            <label class="label" for="{{ form.message.id_for_label }}">
+              <span class="label-text">Message to the shelter (optional)</span>
+            </label>
+            <textarea 
+              id="{{ form.message.id_for_label }}" 
+              name="message" 
+              class="textarea textarea-bordered h-32"
+              placeholder="Share why you'd be a great match for {{ pet.name }}..."
+            ></textarea>
+            <label class="label">
+              <span class="label-text-alt text-base-content/60">This message will be sent to the shelter along with your request.</span>
+            </label>
+          </div>
+          
+          <div class="flex gap-3">
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <a href="{% url 'pets:pet_detail' pet.id %}" class="btn btn-neutral">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

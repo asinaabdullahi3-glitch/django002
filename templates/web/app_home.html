@@ -1,27 +1,118 @@
 {% extends "web/app/app_base.html" %}
 {% load i18n %}
 {% load static %}
+
 {% block app %}
 <section class="app-card">
-    <div class="flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0 lg:flex-row-reverse items-center">
-        <div class="basis-1/3 grow-0 shrink-0">
-            <img class="img-fluid" src="{% static 'images/web/rocket-laptop.svg' %}" alt="{% translate "Fly Away!" %}">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold mb-1">
+      {% if is_shelter %}Shelter Dashboard{% else %}Welcome back, {{ request.user.get_display_name }}!{% endif %}
+    </h1>
+    {% if is_shelter %}
+      <p class="text-base-content/60">Manage your shelter, pets, and adoption requests.</p>
+    {% else %}
+      <p class="text-base-content/60">Find your next companion or track your adoption requests.</p>
+    {% endif %}
+  </div>
+
+  <!-- Stats -->
+  <div class="grid gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+    {% if is_shelter %}
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Total Pets</p>
+          <p class="text-4xl font-bold text-primary">{{ total_pets }}</p>
         </div>
-        <div class="flex-1">
-            <h1 class="text-3xl font-bold mb-2">{% translate "You're Signed In!" %}</h1>
-            <h2 class="text-xl mb-1">
-                {% translate "This is your application's logged in home page." %}
-            </h2>
-            <p>
-                Now go make something great!
-            </p>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Available</p>
+          <p class="text-4xl font-bold text-success">{{ available_pets }}</p>
         </div>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Pending Requests</p>
+          <p class="text-4xl font-bold text-warning">{{ pending_requests }}</p>
+        </div>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Adopted</p>
+          <p class="text-4xl font-bold text-info">{{ adopted_pets }}</p>
+        </div>
+      </div>
+    {% else %}
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Total Requests</p>
+          <p class="text-4xl font-bold text-primary">{{ my_requests }}</p>
+        </div>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Pending</p>
+          <p class="text-4xl font-bold text-warning">{{ pending_requests }}</p>
+        </div>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Approved</p>
+          <p class="text-4xl font-bold text-success">{{ approved_requests }}</p>
+        </div>
+      </div>
+      <div class="card border border-base-300 bg-base-100">
+        <div class="card-body py-5">
+          <p class="text-xs font-semibold uppercase tracking-wide text-base-content/50">Available Pets</p>
+          <p class="text-4xl font-bold text-info">{{ available_pets }}</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid gap-6 md:grid-cols-2">
+    <div class="card border border-base-300 bg-base-100">
+      <div class="card-body">
+        <h3 class="card-title text-lg mb-2">Quick Actions</h3>
+        <div class="flex flex-col gap-2">
+          {% if is_shelter %}
+            <a href="{% url 'pets:pet_create' %}" class="btn btn-primary">Add New Pet</a>
+            <a href="{% url 'pets:pet_list' %}" class="btn btn-neutral">Manage Pets</a>
+            <a href="{% url 'adoptions:request_list' %}" class="btn btn-neutral">Manage Adoption Requests</a>
+            <a href="{% url 'admin:users_customuser_changelist' %}" class="btn btn-neutral">Manage Users</a>
+          {% else %}
+            <a href="{% url 'pets:pet_list' %}" class="btn btn-primary">Browse Pets</a>
+            <a href="{% url 'adoptions:my_requests' %}" class="btn btn-neutral">My Requests</a>
+            <a href="{% url 'users:user_profile' %}" class="btn btn-neutral">Edit Profile</a>
+          {% endif %}
+        </div>
+      </div>
     </div>
-</section>
-<section class="app-card">
-    <div class="prose max-w-none lg:prose-lg">
-        <p>To add more to this page you can make new sections like this one.</p>
-        <p>Tip: the source of this page can be found at <code>templates/web/app_home.html</code></p>
+
+    <div class="card border border-base-300 bg-base-100">
+      <div class="card-body">
+        <h3 class="card-title text-lg mb-2">Activity</h3>
+        <p class="text-base-content/60 leading-relaxed">
+          {% if is_shelter %}
+            {% if pending_requests > 0 %}
+              You have <strong>{{ pending_requests }}</strong> pending adoption request{{ pending_requests|pluralize }} waiting for review.
+            {% else %}
+              No pending adoption requests at the moment.
+            {% endif %}
+          {% else %}
+            {% if available_pets > 0 %}
+              There are <strong>{{ available_pets }}</strong> pet{{ available_pets|pluralize }} available for adoption right now.
+            {% else %}
+              No pets are currently available. Check back soon!
+            {% endif %}
+          {% endif %}
+        </p>
+      </div>
     </div>
+  </div>
+
 </section>
 {% endblock %}

@@ -1,0 +1,190 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'pets:pet_list' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "All Pets" %}
+</a>
+{% endblock %}
+
+{% block page_title %}
+  {% if object %}Edit {{ object.name }}{% else %}Add New Pet{% endif %}
+{% endblock %}
+
+{% block body %}
+<section class="px-4 py-8 mx-auto max-w-(--breakpoint-xl)">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="mb-8 text-4xl font-bold tracking-tight md:text-5xl">
+      {% if object %}Edit {{ object.name }}{% else %}Add New Pet{% endif %}
+    </h1>
+    
+    <div class="card border border-base-300">
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="form-control">
+              <label class="label" for="{{ form.name.id_for_label }}">
+                <span class="label-text">Pet Name *</span>
+              </label>
+              <input 
+                type="text" 
+                id="{{ form.name.id_for_label }}" 
+                name="name" 
+                value="{{ form.name.value|default:'' }}"
+                class="input input-bordered"
+                required
+              >
+              {% if form.name.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.name.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+            
+            <div class="form-control">
+              <label class="label" for="{{ form.breed.id_for_label }}">
+                <span class="label-text">Breed *</span>
+              </label>
+              <input 
+                type="text" 
+                id="{{ form.breed.id_for_label }}" 
+                name="breed" 
+                value="{{ form.breed.value|default:'' }}"
+                class="input input-bordered"
+                required
+              >
+              {% if form.breed.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.breed.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+            
+            <div class="form-control">
+              <label class="label" for="{{ form.species.id_for_label }}">
+                <span class="label-text">Species *</span>
+              </label>
+              <select id="{{ form.species.id_for_label }}" name="species" class="select select-bordered" required>
+                <option value="">Select species</option>
+                {% for value, label in form.species.field.choices %}
+                  <option value="{{ value }}" {% if form.species.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% if form.species.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.species.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+            
+            <div class="form-control">
+              <label class="label" for="{{ form.age.id_for_label }}">
+                <span class="label-text">Age (years) *</span>
+              </label>
+              <input 
+                type="number" 
+                id="{{ form.age.id_for_label }}" 
+                name="age" 
+                value="{{ form.age.value|default:'' }}"
+                class="input input-bordered"
+                min="0"
+                required
+              >
+              {% if form.age.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.age.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+            
+            <div class="form-control">
+              <label class="label" for="{{ form.gender.id_for_label }}">
+                <span class="label-text">Gender *</span>
+              </label>
+              <select id="{{ form.gender.id_for_label }}" name="gender" class="select select-bordered" required>
+                <option value="">Select gender</option>
+                {% for value, label in form.gender.field.choices %}
+                  <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% if form.gender.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.gender.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+            
+            <div class="form-control">
+              <label class="label" for="{{ form.adoption_status.id_for_label }}">
+                <span class="label-text">Adoption Status *</span>
+              </label>
+              <select id="{{ form.adoption_status.id_for_label }}" name="adoption_status" class="select select-bordered" required>
+                {% for value, label in form.adoption_status.field.choices %}
+                  <option value="{{ value }}" {% if form.adoption_status.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% if form.adoption_status.errors %}
+                <label class="label">
+                  <span class="label-text-alt text-error">{{ form.adoption_status.errors }}</span>
+                </label>
+              {% endif %}
+            </div>
+          </div>
+          
+          <div class="mt-6 form-control">
+            <label class="label" for="{{ form.description.id_for_label }}">
+              <span class="label-text">Description</span>
+            </label>
+            <textarea 
+              id="{{ form.description.id_for_label }}" 
+              name="description" 
+              class="textarea textarea-bordered h-32"
+            >{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.description.errors }}</span>
+              </label>
+            {% endif %}
+          </div>
+          
+          <div class="mt-6 form-control">
+            <label class="label" for="{{ form.image.id_for_label }}">
+              <span class="label-text">Pet Photo</span>
+            </label>
+            <input 
+              type="file" 
+              id="{{ form.image.id_for_label }}" 
+              name="image" 
+              class="file-input file-input-bordered"
+              accept="image/*"
+            >
+            {% if form.image.errors %}
+              <label class="label">
+                <span class="label-text-alt text-error">{{ form.image.errors }}</span>
+              </label>
+            {% endif %}
+            {% if object.image %}
+              <label class="label">
+                <span class="label-text-alt">Current image:</span>
+              </label>
+              <img src="{{ object.image.url }}" alt="{{ object.name }}" class="w-32 h-32 rounded-lg object-cover">
+            {% endif %}
+          </div>
+          
+          <div class="mt-8 flex gap-3">
+            <button type="submit" class="btn btn-primary">
+              {% if object %}Update Pet{% else %}Add Pet{% endif %}
+            </button>
+            <a href="{% url 'pets:pet_list' %}" class="btn btn-neutral">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

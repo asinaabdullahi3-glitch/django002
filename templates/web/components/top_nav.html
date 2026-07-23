@@ -1,34 +1,49 @@
 {% load i18n %}
 <div class="sticky top-0 z-50 bg-base-100/80 backdrop-blur-lg border-b border-base-300"
      x-data="{ mobileMenuOpen: false }">
-  <div class="navbar">
-    <div class="navbar-start">
+  <div class="navbar px-4">
+
+    <!-- Left: back button (shown when back_url block is set) + mobile menu toggle -->
+    <div class="navbar-start gap-2">
       <div class="lg:hidden">
-        <button @click="mobileMenuOpen = true" class="btn btn-ghost">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+        <button @click="mobileMenuOpen = true" class="btn btn-ghost btn-sm">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+          </svg>
         </button>
       </div>
+      {% block back_button %}{% endblock %}
     </div>
-    <div class="navbar-center hidden lg:flex">
-      <div role="tablist" class="tabs p-0">
-        <a class="tab {% if request.path == '/' %}tab-active{% endif %}" href="{% url 'web:home' %}">
-          <div>{{project_meta.NAME}}</div>
-        </a>
-      </div>
+
+    <!-- Center: site name -->
+    <div class="navbar-center">
+      <a href="{% url 'web:home' %}" class="text-lg font-semibold tracking-tight hover:opacity-80 transition-opacity">
+        {{ project_meta.NAME }}
+      </a>
     </div>
-    <div class="navbar-end">
+
+    <!-- Right: Dashboard link + auth links -->
+    <div class="navbar-end gap-2">
       {% if user.is_authenticated %}
+        <a href="{% url 'web:home' %}" class="btn btn-primary btn-sm">
+          {% translate "Dashboard" %}
+        </a>
+        <a href="{% url 'account_logout' %}" class="btn btn-ghost btn-sm">
+          {% translate "Sign Out" %}
+        </a>
       {% else %}
-      <a href="{% url 'account_signup' %}" class="btn btn-primary">
-        {% translate "Sign Up" %}
-      </a>
-      <a href="{% url 'account_login' %}" class="btn btn-outline ml-2">
-        {% translate "Sign In" %}
-      </a>
+        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-sm">
+          {% translate "Sign Up" %}
+        </a>
+        <a href="{% url 'account_login' %}" class="btn btn-outline btn-sm">
+          {% translate "Sign In" %}
+        </a>
       {% endif %}
     </div>
+
   </div>
-  <!-- Mobile drawer, teleported to body so it's not clipped by the sticky header -->
+
+  <!-- Mobile drawer -->
   <template x-teleport="body">
     <div x-show="mobileMenuOpen" x-cloak class="fixed inset-0 z-50 lg:hidden">
       <div x-show="mobileMenuOpen"
@@ -59,10 +74,24 @@
         <ul class="menu p-4">
           {% block mobile_nav %}
           <li>
-            <a class="{% if request.path == '/' %}active{% endif %}" href="{% url 'web:home' %}">
-              <div>{{project_meta.NAME}}</div>
+            <a href="{% url 'web:home' %}" class="{% if request.path == '/' %}active{% endif %}">
+              {% translate "Dashboard" %}
             </a>
           </li>
+          {% if user.is_authenticated %}
+          <li>
+            <a href="{% url 'pets:pet_list' %}">{% translate "Browse Pets" %}</a>
+          </li>
+          <li>
+            <a href="{% url 'adoptions:my_requests' %}">{% translate "My Requests" %}</a>
+          </li>
+          <li>
+            <a href="{% url 'users:user_profile' %}">{% translate "Profile" %}</a>
+          </li>
+          <li>
+            <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
+          </li>
+          {% endif %}
           {% endblock %}
         </ul>
       </div>

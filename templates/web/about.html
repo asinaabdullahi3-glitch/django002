@@ -1,0 +1,88 @@
+{% extends "web/base.html" %}
+{% load i18n %}
+
+{% block back_button %}
+<a href="{% url 'web:home' %}" class="btn btn-ghost btn-sm gap-1">
+  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+  </svg>
+  {% translate "Dashboard" %}
+</a>
+{% endblock %}
+
+{% block page_title %}About PetPal{% endblock %}
+
+{% block body %}
+<section class="px-4 py-16 mx-auto max-w-(--breakpoint-xl)">
+  <div class="max-w-3xl mx-auto">
+    <h1 class="mb-8 text-4xl font-bold tracking-tight md:text-5xl">About PetPal</h1>
+    
+    <div class="prose prose-lg max-w-none">
+      <p class="mb-6 text-lg text-base-content/80">
+        PetPal was founded with a simple mission: to connect loving families with pets in need of homes. 
+        We believe every pet deserves a second chance at happiness, and every family deserves the joy 
+        that comes with pet companionship.
+      </p>
+      
+      <h2 class="mt-8 mb-4 text-2xl font-bold">Our Mission</h2>
+      <p class="mb-6 text-base-content/80">
+        To make pet adoption accessible, transparent, and stress-free for both adopters and shelters. 
+        We strive to create a community where pets find their forever homes and families find their perfect companions.
+      </p>
+      
+      <h2 class="mt-8 mb-4 text-2xl font-bold">How It Works</h2>
+      <div class="grid gap-6 my-8 md:grid-cols-3">
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body">
+            <div class="mb-2 text-4xl font-bold text-primary">1</div>
+            <h3 class="card-title">Browse Pets</h3>
+            <p class="text-base-content/70">Explore available pets from verified shelters. Filter by species, breed, age, and more.</p>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body">
+            <div class="mb-2 text-4xl font-bold text-primary">2</div>
+            <h3 class="card-title">Submit Request</h3>
+            <p class="text-base-content/70">Found your match? Submit an adoption request with a personal message to the shelter.</p>
+          </div>
+        </div>
+        <div class="card border border-base-300 bg-base-200/50">
+          <div class="card-body">
+            <div class="mb-2 text-4xl font-bold text-primary">3</div>
+            <h3 class="card-title">Welcome Home</h3>
+            <p class="text-base-content/70">Once approved, complete the adoption process and welcome your new family member home.</p>
+          </div>
+        </div>
+      </div>
+      
+      <h2 class="mt-8 mb-4 text-2xl font-bold">Our Values</h2>
+      <ul class="space-y-3 text-base-content/80">
+        <li class="flex items-start gap-3">
+          <svg class="flex-shrink-0 w-5 h-5 mt-1 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span><strong>Animal Welfare First:</strong> We partner only with shelters that meet high standards of animal care.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <svg class="flex-shrink-0 w-5 h-5 mt-1 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span><strong>Transparency:</strong> Clear communication between adopters and shelters throughout the process.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <svg class="flex-shrink-0 w-5 h-5 mt-1 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span><strong>Community:</strong> Building a supportive network of pet lovers, shelters, and advocates.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <svg class="flex-shrink-0 w-5 h-5 mt-1 text-primary" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span><strong>Accessibility:</strong> Making pet adoption easy for everyone, regardless of location or circumstances.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+{% endblock %}
