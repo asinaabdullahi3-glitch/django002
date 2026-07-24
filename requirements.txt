@@ -1,0 +1,16 @@
+Django>=6.0
+celery[redis]
+celery-progress
+django-allauth[socialaccount]>=65.13.0
+django-anymail[mailgun]
+django-celery-beat
+django-environ
+django-htmx
+django-vite>=3.1.0
+django-waffle
+djangorestframework
+drf-spectacular
+pillow
+psycopg[binary]
+gunicorn
+whitenoise>=6.12.0

@@ -1,0 +1,27 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "bash vercel-build.sh",
+  "outputDirectory": "static",
+  "installCommand": "pip install -r requirements.txt && npm install",
+  "env": {
+    "CELERY_TASK_ALWAYS_EAGER": "true",
+    "DJANGO_VITE_DEV_MODE": "false"
+  },
+  "builds": [
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ]
+}

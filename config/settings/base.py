@@ -99,19 +99,24 @@ MIDDLEWARE = [
 ]
 
 if ENABLE_DEBUG_TOOLBAR:
-    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-    INSTALLED_APPS.append("debug_toolbar")
-    INTERNAL_IPS = ["127.0.0.1"]
     try:
-        import socket
+        import debug_toolbar  # noqa: F401
 
-        # get hostname for Docker environments
-        # See https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#configure-internal-ips
-        hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-        # add discovered IPs plus some common defaults
-        INTERNAL_IPS += [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["192.168.65.1", "10.0.2.2"]
-    except OSError as e:
-        print(f"{e} while attempting to resolve system hostname. Using INTERNAL_IPS={INTERNAL_IPS}")
+        MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+        INSTALLED_APPS.append("debug_toolbar")
+        INTERNAL_IPS = ["127.0.0.1"]
+        try:
+            import socket
+
+            # get hostname for Docker environments
+            # See https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#configure-internal-ips
+            hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
+            # add discovered IPs plus some common defaults
+            INTERNAL_IPS += [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["192.168.65.1", "10.0.2.2"]
+        except OSError as e:
+            print(f"{e} while attempting to resolve system hostname. Using INTERNAL_IPS={INTERNAL_IPS}")
+    except ImportError:
+        pass
 
 # add browser reload only in debug mode
 if DEBUG:

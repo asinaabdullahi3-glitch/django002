@@ -1,6 +1,8 @@
 # flake8: noqa: F405
 """Production settings: imports everything from base.py, then applies prod overrides."""
 
+import os
+
 from django.core.exceptions import ImproperlyConfigured
 
 from .base import *  # noqa F401
@@ -30,14 +32,13 @@ if "postgresql" not in str(DATABASES["default"].get("ENGINE", "")):
 CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # Serve static files directly from the app via WhiteNoise (no separate web server / CDN required).
-# Insert the middleware immediately after SecurityMiddleware, per WhiteNoise's docs.
-MIDDLEWARE.insert(
-    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
-    "whitenoise.middleware.WhiteNoiseMiddleware",
-)
-# Compress static files at collectstatic time. We avoid the *Manifest* variant because assets
-# referenced inside built CSS (fonts/images) can break under hashed-manifest storage.
-STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedStaticFilesStorage"
+# Skip WhiteNoise on Vercel — Vercel serves static files directly from /static.
+if not os.environ.get("VERCEL"):
+    MIDDLEWARE.insert(
+        MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+    )
+    STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # fix ssl mixed content issues
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -81,3 +82,11 @@ USE_HTTPS_IN_ABSOLUTE_URLS = True
 #   4. Use that 16-character password as EMAIL_HOST_PASSWORD.
 
 ADMINS = ["achinga.chris@gmail.com"]
+
+# Vercel deployment overrides
+if os.environ.get("VERCEL"):
+    # Vercel's filesystem is read-only except /tmp.
+    # Media uploads will not persist across function invocations.
+    MEDIA_ROOT = "/tmp/media"
+    # Ensure Celery runs tasks eagerly since there is no broker on Vercel.
+    CELERY_TASK_ALWAYS_EAGER = True
