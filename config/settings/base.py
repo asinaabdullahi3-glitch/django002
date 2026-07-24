@@ -49,7 +49,6 @@ DJANGO_APPS = [
     "django.contrib.sessions",
     "django.contrib.sitemaps",
     "django.contrib.messages",
-    "django.contrib.postgres",
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.forms",
@@ -299,24 +298,34 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # Email setup
+# Uses Gmail SMTP when configured via environment variables.
+# Defaults to the console backend in development so no real emails are sent.
 
-# default email used by your server
-SERVER_EMAIL = env("SERVER_EMAIL", default="noreply@localhost:8000")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="achinga.chris@gmail.com")
-
-# The default value will print emails to the console, but you can change that here
-# and in your environment.
+# SMTP backend configuration.
+# To send real emails locally or in production, set these env vars:
+#     EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+#     EMAIL_HOST=smtp.gmail.com
+#     EMAIL_PORT=587
+#     EMAIL_USE_TLS=True
+#     EMAIL_HOST_USER=your-gmail@gmail.com
+#     EMAIL_HOST_PASSWORD=<Gmail App Password>
+#
+# To generate a Gmail App Password:
+#   1. Enable 2-Step Verification: https://myaccount.google.com/security
+#   2. Go to https://myaccount.google.com/apppasswords
+#   3. Create an app password (name it "Django" or similar).
+#   4. Use that 16-character password as EMAIL_HOST_PASSWORD.
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env("EMAIL_HOST", default="smtp.gmail.com")
+EMAIL_PORT = env.int("EMAIL_PORT", default=587)
+EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 
-# Most production backends will require further customization. The below example uses Mailgun.
-# ANYMAIL = {
-#     "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
-#     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
-# }
-
-# use in production
-# see https://github.com/anymail/django-anymail for more details/examples
-# EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
+# From address used for outgoing emails.
+# When using Gmail SMTP, DEFAULT_FROM_EMAIL defaults to EMAIL_HOST_USER.
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or env("DEFAULT_FROM_EMAIL", default="noreply@localhost")
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
 EMAIL_SUBJECT_PREFIX = "[django-template] "
 
@@ -389,7 +398,9 @@ SCHEDULED_TASKS: dict[str, Any] = {
 PROJECT_METADATA = {
     "NAME": gettext_lazy("PetPal"),
     "URL": "http://localhost:8000",
-    "DESCRIPTION": gettext_lazy("Find your perfect companion. PetPal connects loving families with pets in need of homes."),  # noqa: E501
+    "DESCRIPTION": gettext_lazy(
+        "Find your perfect companion. PetPal connects loving families with pets in need of homes."
+    ),  # noqa: E501
     "IMAGE": "https://upload.wikimedia.org/wikipedia/commons/2/20/PEO-pegasus_black.svg",
     "KEYWORDS": "pet adoption, pets, dogs, cats, animal shelter",
     "CONTACT_EMAIL": "achinga.chris@gmail.com",
@@ -429,6 +440,10 @@ LOGGING = {
         "pegasus": {
             "handlers": ["console"],
             "level": env("PEGASUS_LOG_LEVEL", default="DEBUG"),
+        },
+        "django.core.mail": {
+            "handlers": ["console"],
+            "level": "ERROR",
         },
     },
 }

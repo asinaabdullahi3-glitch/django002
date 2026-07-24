@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: petpal
+    runtime: python
+    # uv.lock is present, so Render will automatically use uv for dependency management.
+    buildCommand: |
+      uv sync --frozen --no-dev --group prod
+      uv run python manage.py collectstatic --noinput
+      uv run python manage.py migrate --noinput
+    startCommand: uv run gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --access-logfile - --error-logfile -
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.prod
+      - key: DEBUG
+        value: "False"
+      - key: ENABLE_DEBUG_TOOLBAR
+        value: "False"
+      - key: DJANGO_VITE_DEV_MODE
+        value: "False"
+      - key: USE_HTTPS_IN_ABSOLUTE_URLS
+        value: "True"
+      - key: PYTHON_VERSION
+        value: "3.14"
+      # Set these in the Render dashboard (mark as secret):
+      - key: SECRET_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: petpal-db
+          property: connectionString
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CSRF_TRUSTED_ORIGINS
+        sync: false
+      # Email (Gmail SMTP) — set these in the Render dashboard (mark as secret):
+      - key: EMAIL_BACKEND
+        value: django.core.mail.backends.smtp.EmailBackend
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      # Optional — set if you want DEFAULT_FROM_EMAIL to differ from EMAIL_HOST_USER:
+      # - key: DEFAULT_FROM_EMAIL
+      #   sync: false
+      # Optional — set if using Redis for Celery/cache:
+      # - key: REDIS_URL
+      #   sync: false
+
+databases:
+  - name: petpal-db
+    databaseName: petpal
+    user: petpal

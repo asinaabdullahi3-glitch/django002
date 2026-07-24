@@ -9,6 +9,10 @@ from .base import *  # noqa F401
 # A future release may remove it from here.
 DEBUG = False
 
+# django.contrib.postgres requires a PostgreSQL backend — add it here where Postgres is guaranteed.
+# (base.py omits it so SQLite-based local dev doesn't break.)
+INSTALLED_APPS.insert(INSTALLED_APPS.index("django.contrib.staticfiles"), "django.contrib.postgres")
+
 # Production requires a PostgreSQL database via DATABASE_URL. There is no SQLite
 # fallback here: fail loudly at startup if it is missing or points elsewhere.
 if "DATABASE_URL" not in env:
@@ -18,6 +22,12 @@ DATABASES = {"default": env.db("DATABASE_URL")}
 
 if "postgresql" not in str(DATABASES["default"].get("ENGINE", "")):
     raise ImproperlyConfigured("Production requires a PostgreSQL DATABASE_URL.")
+
+# CSRF trusted origins: required for form submissions when the app is served from a
+# domain other than ALLOWED_HOSTS (e.g. the Render-assigned *.onrender.com domain).
+# Set CSRF_TRUSTED_ORIGINS in the environment, e.g.:
+#   CSRF_TRUSTED_ORIGINS="https://your-app.onrender.com,https://www.example.com"
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # Serve static files directly from the app via WhiteNoise (no separate web server / CDN required).
 # Insert the middleware immediately after SecurityMiddleware, per WhiteNoise's docs.
@@ -55,14 +65,19 @@ USE_HTTPS_IN_ABSOLUTE_URLS = True
 # ALLOWED_HOSTS = ["example.com"]
 
 # Your email config goes here.
-# see https://github.com/anymail/django-anymail for more details / examples
-# To use mailgun, uncomment the lines below and make sure your key and domain
-# are available in the environment.
-# EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
-
-# ANYMAIL = {
-#     "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
-#     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
-# }
+# Use Gmail SMTP in production. Set these environment variables:
+#     EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+#     EMAIL_HOST=smtp.gmail.com
+#     EMAIL_PORT=587
+#     EMAIL_USE_TLS=True
+#     EMAIL_HOST_USER=your-gmail@gmail.com
+#     EMAIL_HOST_PASSWORD=<Gmail App Password>
+#     DEFAULT_FROM_EMAIL=your-gmail@gmail.com
+#
+# To generate a Gmail App Password:
+#   1. Enable 2-Step Verification: https://myaccount.google.com/security
+#   2. Go to https://myaccount.google.com/apppasswords
+#   3. Create an app password (name it "Django" or similar).
+#   4. Use that 16-character password as EMAIL_HOST_PASSWORD.
 
 ADMINS = ["achinga.chris@gmail.com"]
