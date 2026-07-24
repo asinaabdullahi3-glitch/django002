@@ -1,92 +1,121 @@
 # flake8: noqa: F405
-"""Production settings: imports everything from base.py, then applies prod overrides."""
+"""Production settings."""
 
 import os
 
 from django.core.exceptions import ImproperlyConfigured
 
-from .base import *  # noqa F401
+from .base import *
 
-# Note: it is recommended to use the "DEBUG" environment variable to override this value in base.py.
-# A future release may remove it from here.
 DEBUG = False
 
-# django.contrib.postgres requires a PostgreSQL backend — add it here where Postgres is guaranteed.
-# (base.py omits it so SQLite-based local dev doesn't break.)
-INSTALLED_APPS.insert(INSTALLED_APPS.index("django.contrib.staticfiles"), "django.contrib.postgres")
+# PostgreSQL support
+INSTALLED_APPS.insert(
+    INSTALLED_APPS.index("django.contrib.staticfiles"),
+    "django.contrib.postgres",
+)
 
-# Production requires a PostgreSQL database via DATABASE_URL. There is no SQLite
-# fallback here: fail loudly at startup if it is missing or points elsewhere.
+# Database
 if "DATABASE_URL" not in env:
     raise ImproperlyConfigured("DATABASE_URL must be set in production.")
 
-DATABASES = {"default": env.db("DATABASE_URL")}
+DATABASES = {
+    "default": env.db("DATABASE_URL")
+}
 
-if "postgresql" not in str(DATABASES["default"].get("ENGINE", "")):
-    raise ImproperlyConfigured("Production requires a PostgreSQL DATABASE_URL.")
+if "postgresql" not in str(DATABASES["default"]["ENGINE"]):
+    raise ImproperlyConfigured("Production requires PostgreSQL.")
 
-# CSRF trusted origins: required for form submissions when the app is served from a
-# domain other than ALLOWED_HOSTS (e.g. the Render-assigned *.onrender.com domain).
-# Set CSRF_TRUSTED_ORIGINS in the environment, e.g.:
-#   CSRF_TRUSTED_ORIGINS="https://your-app.onrender.com,https://www.example.com"
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+# ==========================================================
+# ALLOWED HOSTS
+# ==========================================================
 
-# Serve static files directly from the app via WhiteNoise (no separate web server / CDN required).
-# Skip WhiteNoise on Vercel — Vercel serves static files directly from /static.
-if not os.environ.get("VERCEL"):
-    MIDDLEWARE.insert(
-        MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
-        "whitenoise.middleware.WhiteNoiseMiddleware",
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=[
+        "django003.onrender.com",
+        "localhost",
+        "127.0.0.1",
+    ],
+)
+
+# Automatically add Render hostname if available
+RENDER_EXTERNAL_HOSTNAME = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+
+if RENDER_EXTERNAL_HOSTNAME and RENDER_EXTERNAL_HOSTNAME not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# ==========================================================
+# CSRF
+# ==========================================================
+
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=[
+        "https://django003.onrender.com",
+    ],
+)
+
+if (
+    RENDER_EXTERNAL_HOSTNAME
+    and f"https://{RENDER_EXTERNAL_HOSTNAME}" not in CSRF_TRUSTED_ORIGINS
+):
+    CSRF_TRUSTED_ORIGINS.append(
+        f"https://{RENDER_EXTERNAL_HOSTNAME}"
     )
-    STORAGES["staticfiles"]["BACKEND"] = "whitenoise.storage.CompressedStaticFilesStorage"
 
-# fix ssl mixed content issues
+# ==========================================================
+# WhiteNoise
+# ==========================================================
+
+MIDDLEWARE.insert(
+    MIDDLEWARE.index("django.middleware.security.SecurityMiddleware") + 1,
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+)
+
+STORAGES["staticfiles"]["BACKEND"] = (
+    "whitenoise.storage.CompressedManifestStaticFilesStorage"
+)
+
+# ==========================================================
+# Security
+# ==========================================================
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-# Django security checklist settings.
-# More details here: https://docs.djangoproject.com/en/stable/howto/deployment/checklist/
 SECURE_SSL_REDIRECT = True
+
 SESSION_COOKIE_SECURE = True
+
 CSRF_COOKIE_SECURE = True
-
-# HTTP Strict Transport Security settings
-# Without uncommenting the lines below, you will get security warnings when running ./manage.py check --deploy
-# https://docs.djangoproject.com/en/stable/ref/middleware/#http-strict-transport-security
-
-# # Increase this number once you're confident everything works https://stackoverflow.com/a/49168623/8207
-# SECURE_HSTS_SECONDS = 60
-# # Uncomment these two lines if you are sure that you don't host any subdomains over HTTP.
-# # You will get security warnings if you don't do this.
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
 
 USE_HTTPS_IN_ABSOLUTE_URLS = True
 
-# If you don't want to use environment variables to set production hosts you can add them here
-# ALLOWED_HOSTS = ["example.com"]
+SECURE_HSTS_SECONDS = 31536000
 
-# Your email config goes here.
-# Use Gmail SMTP in production. Set these environment variables:
-#     EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-#     EMAIL_HOST=smtp.gmail.com
-#     EMAIL_PORT=587
-#     EMAIL_USE_TLS=True
-#     EMAIL_HOST_USER=your-gmail@gmail.com
-#     EMAIL_HOST_PASSWORD=<Gmail App Password>
-#     DEFAULT_FROM_EMAIL=your-gmail@gmail.com
-#
-# To generate a Gmail App Password:
-#   1. Enable 2-Step Verification: https://myaccount.google.com/security
-#   2. Go to https://myaccount.google.com/apppasswords
-#   3. Create an app password (name it "Django" or similar).
-#   4. Use that 16-character password as EMAIL_HOST_PASSWORD.
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
-ADMINS = ["achinga.chris@gmail.com"]
+SECURE_HSTS_PRELOAD = True
 
-# Vercel deployment overrides
+# ==========================================================
+# Email
+# ==========================================================
+
+ADMINS = [
+    "achinga.chris@gmail.com",
+]
+
+# ==========================================================
+# Vercel Overrides
+# ==========================================================
+
 if os.environ.get("VERCEL"):
-    # Vercel's filesystem is read-only except /tmp.
-    # Media uploads will not persist across function invocations.
     MEDIA_ROOT = "/tmp/media"
-    # Ensure Celery runs tasks eagerly since there is no broker on Vercel.
     CELERY_TASK_ALWAYS_EAGER = True
+
+# ==========================================================
+# Debug (remove after confirming deployment)
+# ==========================================================
+
+print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+print("CSRF_TRUSTED_ORIGINS:", CSRF_TRUSTED_ORIGINS)
