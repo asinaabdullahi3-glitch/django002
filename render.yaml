@@ -29,9 +29,9 @@ services:
           name: petpal-db
           property: connectionString
       - key: ALLOWED_HOSTS
-        sync: false
+        value: django003.onrender.com
       - key: CSRF_TRUSTED_ORIGINS
-        sync: false
+        value: https://django003.onrender.com
       # Email (Gmail SMTP) — set these in the Render dashboard (mark as secret):
       - key: EMAIL_BACKEND
         value: django.core.mail.backends.smtp.EmailBackend
