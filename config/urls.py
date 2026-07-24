@@ -52,4 +52,9 @@ if "django_browser_reload.middleware.BrowserReloadMiddleware" in settings.MIDDLE
     urlpatterns.insert(0, path("__reload__/", include("django_browser_reload.urls")))
 
 if settings.ENABLE_DEBUG_TOOLBAR:
-    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+    try:
+        import debug_toolbar  # noqa: F401
+
+        urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+    except ImportError:
+        pass
